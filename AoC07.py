@@ -77,17 +77,41 @@ def count_splits(input):
     return current
 
 
+def enumerate_paths(lines):
+    grid = [list(row) for row in lines]
+    H, W = len(grid), len(grid[0])
 
+    sr = 0
+    sc = lines[0].find('S')
+    memo = {}
+
+    def T(l, c):
+        if (l >= H) or (c < 0) or (c >= W):
+            return 1
+        if (l, c) in memo:
+            return memo[(l, c)]
+        x = grid[l][c]
+        if (x == '.') or (x == 'S'):
+            out = T(l + 1, c)
+        elif x == '^':
+            out = T(l + 1, c - 1) + T(l + 1, c + 1)
+        memo[(l, c)] = out
+        return out
+
+    return T(sr + 1, sc)
 
 
 
 input = test
-s_test = count_splits(input)
-print(f'test: {s_test}')
+s1_test = count_splits(input)
+print(f'test: {s1_test}')
+s2_test = enumerate_paths(input)
+print(f'test: {s2_test}')
 
 input = txt_file_to_list('input_07.txt')
 s1 = count_splits(input)
 print(f'1: {s1}')
+
 
 s2 = enumerate_paths(input)
 print(f's2: {s2}')
