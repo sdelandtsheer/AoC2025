@@ -61,7 +61,7 @@ s_test = np.sum((sums<4) & (test_matrix>0))
 v1 = txt_file_to_list('input_04.txt')
 s1_matrix = make_matrix(v1)
 sums_s1 = run_count_rolls(s1_matrix)
-s1 = np.sum((sums_s1<4)&(s1_matrix>0))
+s1 = np.sum((sums_s1<4) & (s1_matrix>0))
 
 total_rolls = 0
 need_process = True
