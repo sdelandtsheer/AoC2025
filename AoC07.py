@@ -77,12 +77,11 @@ def count_splits(input):
     return current
 
 
-def enumerate_paths(lines):
-    grid = [list(row) for row in lines]
-    H, W = len(grid), len(grid[0])
+def enumerate_paths(input):
+    H, W = len(input), len(input[0])
 
     sr = 0
-    sc = lines[0].find('S')
+    sc = input[0].find('S')
     memo = {}
 
     def T(l, c):
@@ -90,7 +89,7 @@ def enumerate_paths(lines):
             return 1
         if (l, c) in memo:
             return memo[(l, c)]
-        x = grid[l][c]
+        x = input[l][c]
         if (x == '.') or (x == 'S'):
             out = T(l + 1, c)
         elif x == '^':
