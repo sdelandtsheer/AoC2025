@@ -75,52 +75,64 @@ def make_dist_matrix(input):
         matrix[l][l] = 1E6
     return matrix
 
-def find_closest(matrix, n_links):
-    result = [[]]
+def find_closest(matrix, input, n_links):
+    result = []
     n_connect = 0
     ceiling = max(max(matrix))
     while n_connect < n_links:
-        bottom = min(min(matrix))
+        mins_per_line = [min(line) for line in matrix]
+        bottom = min(mins_per_line)
         print(f'new low: {bottom}')
-        l_find = min(matrix).index(bottom)
-        if not isinstance(l_find, int):
-            l_find = l_find[0]
+
+        l_find = mins_per_line.index(bottom)
         c_find = matrix[l_find].index(bottom)
-        if not isinstance(c_find, int):
-            c_find = c_find[0]
         print(f'coordinates: {l_find}, {c_find}')
+        print(f'id: {input[l_find]}, {input[c_find]}')
         matrix[l_find][c_find] = ceiling
         matrix[c_find][l_find] = ceiling
 
-        found = False
-        for res in result:
-            if l_find in res and c_find in res:
-                print(f'both {l_find} and {c_find} exist in {res}')
-                found = True
-                break
-            elif l_find in res:
-                print(f'{l_find} already in {res}, adding {c_find}')
-                res.append(c_find)
-                n_connect += 1
-                found = True
-                break
-            elif c_find in res:
-                print(f'{c_find} already in {res}, adding {l_find}')
-                res.append(l_find)
-                n_connect += 1
-                found = True
-                break
-        if not found:
-            print(f'new')
+        found = [-1, -1]
+        for idx, group in enumerate(result):
+            if l_find in group:
+                print(f'{input[l_find]} exists in {group}')
+                found[0] = idx
+            if c_find in group:
+                print(f'{input[c_find]} exists in {group}')
+                found[1] = idx
+
+        print(found)
+        if found == [-1, -1]:
+            print(f'new group: {input[l_find]}, {input[c_find]}')
             n_connect += 1
             result.append([l_find, c_find])
             print(f'result: {result}')
+        elif (found[1] < 0) and (found[0] >= 0):
+            print(f'{input[l_find]} exists in {result[found[0]]}')
+            result[found[0]].append(c_find)
+            n_connect += 1
+        elif (found[0] < 0) and (found[1] >= 0):
+            print(f'{input[c_find]} exists in {result[found[1]]}')
+            result[found[1]].append(l_find)
+            n_connect += 1
+        elif (found[0] * found[1]) >= 0:
+            if found[0] == found[1]:
+                print(f'{input[l_find]} and {input[c_find]} exist in {result[found[0]]}')
+                n_connect += 1
+                # pass
+            else:
+                print(f'{input[l_find]} and {input[c_find]} exist in {result[found[0]]} and {result[found[1]]}')
+                merged = list(set(result[found[0]] + result[found[1]]))
+                result[found[0]] = merged
+                result.pop(found[1])
+                n_connect += 1
+        print(result)
 
     return result
 
+
 def count_largest_groups(input=input, n_links=None, n_groups=None):
     matrix = make_dist_matrix(input)
-    result = find_closest(matrix, n_links)
+    result = find_closest(matrix, input, n_links)
     lengths = [len(x) for x in result]
     to_multiply = sorted(lengths, reverse=True)[:n_groups]
     total = 1
@@ -129,7 +141,66 @@ def count_largest_groups(input=input, n_links=None, n_groups=None):
 
     return total, result
 
+def part2(input):
+    is_all_connected = False
+    matrix = make_dist_matrix(input)
+    result = []
+    n_connect = 0
+    ceiling = max(max(matrix))
+    while not is_all_connected:
+        mins_per_line = [min(line) for line in matrix]
+        bottom = min(mins_per_line)
+        print(f'new low: {bottom}')
 
+        l_find = mins_per_line.index(bottom)
+        c_find = matrix[l_find].index(bottom)
+        print(f'coordinates: {l_find}, {c_find}')
+        print(f'id: {input[l_find]}, {input[c_find]}')
+        matrix[l_find][c_find] = ceiling
+        matrix[c_find][l_find] = ceiling
+
+        found = [-1, -1]
+        for idx, group in enumerate(result):
+            if l_find in group:
+                print(f'{input[l_find]} exists in {group}')
+                found[0] = idx
+            if c_find in group:
+                print(f'{input[c_find]} exists in {group}')
+                found[1] = idx
+
+        print(found)
+        if found == [-1, -1]:
+            print(f'new group: {input[l_find]}, {input[c_find]}')
+            n_connect += 1
+            result.append([l_find, c_find])
+            print(f'result: {result}')
+        elif (found[1] < 0) and (found[0] >= 0):
+            print(f'{input[l_find]} exists in {result[found[0]]}')
+            result[found[0]].append(c_find)
+            n_connect += 1
+        elif (found[0] < 0) and (found[1] >= 0):
+            print(f'{input[c_find]} exists in {result[found[1]]}')
+            result[found[1]].append(l_find)
+            n_connect += 1
+        elif (found[0] * found[1]) >= 0:
+            if found[0] == found[1]:
+                print(f'{input[l_find]} and {input[c_find]} exist in {result[found[0]]}')
+                n_connect += 1
+                # pass
+            else:
+                print(f'{input[l_find]} and {input[c_find]} exist in {result[found[0]]} and {result[found[1]]}')
+                merged = list(set(result[found[0]] + result[found[1]]))
+                result[found[0]] = merged
+                result.pop(found[1])
+                n_connect += 1
+        print(result)
+        if (len(result) == 1) and (len(result[0]) == len(input)):
+            is_all_connected = True
+
+    x1, y1, z1 = input[l_find]
+    x2, y2, z2 = input[c_find]
+
+    return (x1 * x2)
 
 
 
@@ -141,3 +212,8 @@ n_groups = 3
 s1_test, groups = count_largest_groups(input, n_links=n_links, n_groups=n_groups)
 print(s1_test)
 
+input = txt_file_to_list('input_08.txt')
+n_links = 1000
+s1, groups = count_largest_groups(input, n_links=n_links, n_groups=n_groups)
+
+s2 = part2(input)
